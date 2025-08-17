@@ -260,3 +260,4 @@ splitHead x = (elPrimero x, sinElPrimero x)
 
 
 
+
