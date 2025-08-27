@@ -49,6 +49,16 @@ siguiente Oeste = Norte
 
 data DiaDeSemana = Lunes | Martes | Miercoles | Jueves | Viernes | Sabado | Domingo 
                 deriving Show
+
+instance Eq DiaDeSemana where
+    Lunes == Lunes = True
+    Martes == Martes = True
+    Miercoles == Miercoles = True
+    Jueves == Jueves = True
+    Viernes == Viernes = True
+    Sabado == Sabado = True
+    Domingo == Domingo = True
+    _ == _ = False
 primerDiaDeSemana :: DiaDeSemana
 primerDiaDeSemana = Lunes
 
@@ -64,6 +74,8 @@ ultimoDiaDeSemana = Domingo
 
 primeroYUltimoDia :: (DiaDeSemana, DiaDeSemana)
 primeroYUltimoDia = (primerDiaDeSemana, ultimoDiaDeSemana)
+
+
 
 empiezaConM :: DiaDeSemana -> Bool
 empiezaConM Lunes = False
@@ -91,12 +103,13 @@ vieneDespues Sabado Domingo = True
 vieneDespues Domingo Lunes = True
 vieneDespues _ _ = False 
 
-{-
+
 estaEnElMedio :: DiaDeSemana -> Bool
-estaEnElMedio x = (if disyuncionPM x = primerDiaDeSemana x =ultimoDiaDeSemana)
+--Dado un día de la semana indica si no es ni el primer ni el ultimo dia.
+estaEnElMedio x = if x == primerDiaDeSemana || x == ultimoDiaDeSemana 
                 then False
                 else True 
-FALLA-}
+
 
 negar :: Bool -> Bool
 negar x = if (x == True)
