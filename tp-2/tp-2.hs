@@ -22,7 +22,7 @@ sucesores :: [Int] -> [Int]
 sucesores [] = []
 sucesores (n : ns) = (n + 1) : sucesores ns
 
---CORREGIR SIN PREC 
+
 conjuncion :: [Bool] -> Bool
 --Prop: Dada una lista de booleanos devuelve True si todos sus elementos son True
 
@@ -232,12 +232,10 @@ cantPokemonDe t (ConsEntrenador n ((ConsPokemon x _) : ps)) = if (t == x)
 cuantosDeTipo_De_LeGananATodosLosDe_ :: TipoDePokemon -> Entrenador -> Entrenador -> Int
 {-Prop: Dados dos entrenadores, indica la cantidad de Pokemon de cierto tipo pertenecientes al
 primer entrenador, que le ganarían a todos los Pokemon del segundo entrenador. -}
-cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador [] _ ) _ = 0
-cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador n (p : ps)) e2 = if cantPokemonDe t (ConsEntrenador n (p : ps)) == 0
-                                                                            then 0
-                                                                            else if leGanaATodosLosDe p (pokemonDe e2)
-                                                                                then 1 + cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador n ps) e2
-                                                                                else cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador n ps) e2
+cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador _ []) _ = 0
+cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador n (p : ps)) e2 = if (tipoDe p == t && leGanaATodosLosDe p (pokemonDe e2))
+                                                                            then 1 + cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador n ps) e2
+                                                                            else cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador n ps) e2
 
 
 --subtarea
