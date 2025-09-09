@@ -189,7 +189,7 @@ heightT :: Tree a -> Int
 {-Nota: la altura de un árbol (height en inglés), también llamada profundidad, es
 la cantidad de niveles del árbol1. La altura para EmptyT es 0, y para una hoja es 1. -}
 heightT EmptyT = 0
-heightT (NodeT x tx ty) = unoSi(esHoja(NodeT x tx ty)) + heightT tx + heightT ty
+heightT (NodeT x tx ty) = unoSi(esHoja(NodeT x tx ty)) + max (heightT tx) (heightT ty)
 
 mirrorT :: Tree a -> Tree a
 --Prop: Dado un árbol devuelve el árbol resultante de intercambiar el hijo izquierdo con el derecho, en cada nodo del árbol.
@@ -272,7 +272,6 @@ d) - (- x) = x -}
 simplificar (Valor x) = (Valor x)
 simplificar (Sum x y) = simplificarSumaCero (Sum (simplificar x) (simplificar y))
 simplificar (Prod x y) = simplificarProdUno (simplificarProdCero (Prod (simplificar x) (simplificar y)))
-simplificar (Neg x) = simplificarNeg (Neg (simplificar x))
 simplificar (Neg x) = simplificarNeg (Neg (simplificar x))
 
 
