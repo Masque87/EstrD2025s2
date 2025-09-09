@@ -269,13 +269,38 @@ a) 0 + x = x + 0 = x
 b) 0 * x = x * 0 = 0
 c) 1 * x = x * 1 = x
 d) - (- x) = x -}
-simplificar (Valor x) = (Valor x)
-simplificar (Sum x y) = simplificarSumaCero (Sum (simplificar x) (simplificar y))
-simplificar (Prod x y) = simplificarProdUno (simplificarProdCero (Prod (simplificar x) (simplificar y)))
-simplificar (Neg x) = simplificarNeg (Neg (simplificar x))
 
+simplificar (Valor x) = (Valor x)
+simplificar (Sum x y) = simplificarSumaCero (simplificar x) (simplificar y)
+simplificar (Prod x y) = simplificarProd (simplificar x) (simplificar y)
+simplificar (Neg x) = simplificarNeg (simplificar x)
 
 --Subtareas
+simplificarSumaCero :: ExpA -> ExpA -> ExpA 
+--Prop: Dada una expresiones de suma devuelve el otro numero que no es cero, si los dos no lo son devuelve la expresion de suma entre los dos dados 
+--Prec: la ExpA dada debe ser un Sum
+simplificarSumaCero (Valor 0) y = y 
+simplificarSumaCero x (Valor 0) = x 
+simplificarSumaCero x y = (Sum x y)
+
+simplificarProd :: ExpA -> ExpA -> ExpA
+--Prop: dada dos expresion de producto, simplifica si se puede matematicamente, sino devuelve el producto de los dos elementos
+--Prec: la ExpA dada debe ser un Prod
+simplificarProd (Valor 1) y = y 
+simplificarProd x (Valor 1) = x
+simplificarProd (Valor 0) _ = Valor 0
+simplificarProd _ (Valor 0) = Valor 0
+simplificarProd x y = (Prod x y) 
+
+
+simplificarNeg :: ExpA -> ExpA 
+--Prop: Dado un Neg x simplifica si x ya es un negativo, sino no hace nada
+--Prec: La ExpA dada debe ser Neg
+simplificarNeg (Neg (Neg x)) = x 
+simplificarNeg (Neg x) = (Neg x)
+
+
+{-
 esCero :: ExpA -> Bool
 --Prop: indica si la expresion aritmetica dada es cero.
 esCero x = (eval x) == 0
@@ -283,38 +308,7 @@ esCero x = (eval x) == 0
 esUno :: ExpA -> Bool
 --Prop: Indica si la expresion aritmetica dada es uno
 esUno x = (eval x) == 1
-{-No Usada
+No Usada
 esNegativo :: ExpA -> Bool
 --Prop: Indica si la expresion aritmetica dada es negativa
 esNegativo x = (eval x) < 0 -} 
-
-simplificarSumaCero :: ExpA -> ExpA 
---Prop: Dada una expresiones de suma devuelve el otro numero que no es cero, si los dos no lo son no hace nada 
---Prec: la ExpA dada debe ser un Sum
-simplificarSumaCero (Sum x y) = if esCero x
-                        then y
-                        else if esCero y 
-                            then x
-                            else (Sum x y)
-
-simplificarProdCero :: ExpA -> ExpA
---Prop: dada una expresion de Prod devuelve 0 si uno de las dos expresiones son cero, sino no hace nada
---Prec: la ExpA dada debe ser un Prod
-simplificarProdCero (Prod x y) = if (esCero x || esCero y )
-                                    then (Valor 0)
-                                    else (Prod x y)
-
-simplificarProdUno :: ExpA -> ExpA
---Prop: dada una expresion de producto devuelve el otro numero que no  sea uno, si ninguno es uno no hace nada
---Prec: la ExpA dada debe ser un Prod
-simplificarProdUno (Prod x y) = if esUno x 
-                                    then y 
-                                    else if esUno y
-                                        then x
-                                        else (Prod x y)
-
-simplificarNeg :: ExpA -> ExpA 
---Prop: Dado un Neg x simplifica si x ya es un negativo, sino no hace nada
---Prec: La ExpA dada debe ser Neg
-simplificarNeg (Neg (Neg x)) = x 
-simplificarNeg (Neg x) = (Neg x)

@@ -265,10 +265,7 @@ pokemonDe (ConsEntrenador p n) = n
 leGanaATodosLosDe :: Pokemon -> [Pokemon] -> Bool
 --Prop: Indica si el pokemon dado le gana a todos los demás pokemon de la lista dada segun el tipo
 leGanaATodosLosDe x [] = True
-leGanaATodosLosDe x (y : ys) = if leGanaA  x y 
-                                    then leGanaATodosLosDe x ys
-                                    else False
-
+leGanaATodosLosDe x (y : ys) = if leGanaA  x y && leGanaATodosLosDe x ys
 
 esMaestroPokemon :: Entrenador -> Bool
 --Prop: Dado un entrenador, devuelve True si posee al menos un Pokémon de cada tipo posible.
