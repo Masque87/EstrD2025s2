@@ -196,11 +196,15 @@ elMasViejo :: [Persona] -> Persona
 {- Prop: Dada una lista de personas devuelve la persona más vieja de la lista. Precondición: la
 lista al menos posee una persona -}
 elMasViejo [] = error "la lista debe poseer al menos una persona"
-elMasViejo (x : [] ) = x
-elMasViejo (x : xs) = if edad x >= edad (elMasViejo xs) 
+elMasViejo (x : []) = x
+elMasViejo (x : xs) = if edadDeUnaPersona x >= edadDeUnaPersona (elMasViejo xs) 
                                 then x
                                 else elMasViejo xs
-                                where edad (P n e) = e
+
+--subtarea 
+edadDeUnaPersona :: Persona -> Int 
+--Prop: Dada una persona devuelve su edad
+edadDeUnaPersona (P _ e) = e
 --2
 data TipoDePokemon = Agua | Fuego | Planta
 instance Eq TipoDePokemon where
@@ -228,15 +232,26 @@ cantPokemonDe t (ConsEntrenador n []) = 0
 cantPokemonDe t (ConsEntrenador n ((ConsPokemon x _) : ps)) = if (t == x)
                                                                 then 1 + cantPokemonDe t (ConsEntrenador n ps)
                                                                 else 0 + cantPokemonDe t (ConsEntrenador n ps)
-
+{-
 cuantosDeTipo_De_LeGananATodosLosDe_ :: TipoDePokemon -> Entrenador -> Entrenador -> Int
 {-Prop: Dados dos entrenadores, indica la cantidad de Pokemon de cierto tipo pertenecientes al
 primer entrenador, que le ganarían a todos los Pokemon del segundo entrenador. -}
 cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador _ []) _ = 0
 cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador n (p : ps)) e2 = if (tipoDe p == t && leGanaATodosLosDe p (pokemonDe e2))
                                                                             then 1 + cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador n ps) e2
-                                                                            else cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador n ps) e2
+                                                                            else cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador n ps) e2 -}
 
+cuantosDeTipo_De_LeGananATodosLosDe_ :: TipoDePokemon -> Entrenador -> Entrenador -> Int
+{-Prop: Dados dos entrenadores, Describe la cantidad de Pokemon de cierto tipo pertenecientes al primer entrenador, que le ganarían a todos los Pokemon del segundo entrenador. -}
+cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador _ ps) e2 = cuantosDeTipoEnLista t ps (pokemonDe e2)
+
+--subtarea
+cuantosDeTipoEnLista :: TipoDePokemon -> [Pokemon] -> [Pokemon] -> Int
+--Prop: Describe dado los pokemon de la primera lista que son del tipo dado, que le ganan a todos los pokemons de la segunda lista
+cuantosDeTipoEnLista _ [] _ = 0
+cuantosDeTipoEnLista t (p:ps) p2 = if tipoDe p == t && leGanaATodosLosDe p p2
+                                    then 1 + cuantosDeTipoEnLista t ps p2
+                                    else cuantosDeTipoEnLista t ps p2
 
 --subtarea
 tipo_LeGanaA_ :: TipoDePokemon -> TipoDePokemon -> Bool
@@ -265,7 +280,7 @@ pokemonDe (ConsEntrenador p n) = n
 leGanaATodosLosDe :: Pokemon -> [Pokemon] -> Bool
 --Prop: Indica si el pokemon dado le gana a todos los demás pokemon de la lista dada segun el tipo
 leGanaATodosLosDe x [] = True
-leGanaATodosLosDe x (y : ys) = if leGanaA  x y && leGanaATodosLosDe x ys
+leGanaATodosLosDe x (y : ys) = leGanaA  x y && leGanaATodosLosDe x ys
 
 esMaestroPokemon :: Entrenador -> Bool
 --Prop: Dado un entrenador, devuelve True si posee al menos un Pokémon de cada tipo posible.
@@ -342,20 +357,34 @@ todosLosProyectos (ConsEmpresa (x : xs))  = proyectoDeUnRol x : todosLosProyecto
 
 
 --2
+{-
 losDevSenior :: Empresa -> [Proyecto] -> Int
 {- Prop: Dada una empresa indica la cantidad de desarrolladores senior que posee, que pertecen
 además a los proyectos dados por parámetro. -}
 losDevSenior _ [] = 0
 losDevSenior e (x : xs) = longitud (losDevsSeniorQueTrabajanEnElProyecto e x) + (losDevSenior e xs)
 
-{-
---subtarea
-todosLosDevSenior :: Empresa -> [Rol]
---Prop: dada una Empresa devuelve una lista con los developer senior de una empresa
-todosLosDevSenior (ConsEmpresa []) = []
-todosLosDevSenior (ConsEmpresa (x : xs)) = if esDevSenior x
-                                                then x : todosLosDevSenior (ConsEmpresa xs)
-                                                else todosLosDevSenior (ConsEmpresa xs) -}
+
+losDevsSeniorQueTrabajanEnElProyecto :: Empresa -> Proyecto ->  [Rol]
+--Dado una Empresa y un proyecto devuelve la lista de Developer Senior que trabajan en el proyecto dado
+losDevsSeniorQueTrabajanEnElProyecto (ConsEmpresa []) _ = []
+losDevsSeniorQueTrabajanEnElProyecto (ConsEmpresa (x : xs)) p = if ((esDevSenior x) && (devTrabajaEnProyecto x p)) 
+                                                                    then x : losDevsSeniorQueTrabajanEnElProyecto (ConsEmpresa xs) p
+                                                                    else losDevsSeniorQueTrabajanEnElProyecto (ConsEmpresa xs) p  -}
+
+losDevSenior :: Empresa -> [Proyecto] -> Int
+{- Prop: Dada una empresa indica la cantidad de desarrolladores senior que posee, que pertecen
+además a los proyectos dados por parámetro. -}
+losDevSenior (ConsEmpresa _) [] = 0
+losDevSenior (ConsEmpresa rs) (p:ps) = longitud (losDevsSeniorQueTrabajanEnElProyecto rs p) + losDevSenior (ConsEmpresa rs) ps
+
+losDevsSeniorQueTrabajanEnElProyecto :: [Rol] -> Proyecto -> [Rol]
+--Prop: Dado una lista de Rol y un Proyecto, devuelve los developer Senior que trabajan en el proyecto dado
+losDevsSeniorQueTrabajanEnElProyecto [] _ = []
+losDevsSeniorQueTrabajanEnElProyecto (x:xs) p = if esDevSenior x && devTrabajaEnProyecto x p
+                                                    then x : losDevsSeniorQueTrabajanEnElProyecto xs p
+                                                    else losDevsSeniorQueTrabajanEnElProyecto xs p
+
 
 --subtarea
 esDevSenior :: Rol -> Bool
@@ -369,12 +398,6 @@ devTrabajaEnProyecto :: Rol -> Proyecto -> Bool
 devTrabajaEnProyecto (Developer _ p) e =  p == e 
 devTrabajaEnProyecto _ _ = False
 
-losDevsSeniorQueTrabajanEnElProyecto :: Empresa -> Proyecto ->  [Rol]
---Dado una Empresa y un proyecto devuelve la lista de Developer Senior que trabajan en el proyecto dado
-losDevsSeniorQueTrabajanEnElProyecto (ConsEmpresa []) _ = []
-losDevsSeniorQueTrabajanEnElProyecto (ConsEmpresa (x : xs)) p = if ((esDevSenior x) && (devTrabajaEnProyecto x p)) 
-                                                                    then x : losDevsSeniorQueTrabajanEnElProyecto (ConsEmpresa xs) p
-                                                                    else losDevsSeniorQueTrabajanEnElProyecto (ConsEmpresa xs) p 
 
 --3
 
@@ -402,18 +425,36 @@ trabajaEnAlguno e (x : xs) = if ((proyectoDeUnRol e) == x)
                                         else trabajaEnAlguno e xs
 
 --4
+
 asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
 {- Prop: Devuelve una lista de pares que representa a los proyectos (sin repetir) junto con su
 cantidad de personas involucradas. -}
+asignadosPorProyecto (ConsEmpresa []) = []
+asignadosPorProyecto (ConsEmpresa (x:xs)) = sumarAlProyecto (proyectoDeUnRol x) (asignadosPorProyecto (ConsEmpresa xs))
+
+-- subtarea
+sumarAlProyecto :: Proyecto -> [(Proyecto, Int)] -> [(Proyecto, Int)]
+--Prop: dado un proyecto y una lista de pares de proyectos con su cantidad de involucrados, incrementa la cantidad de involucrados en ese proyecto.
+sumarAlProyecto p [] = [(p,1)]
+sumarAlProyecto p ((p2, n): xs) = if p == p2
+                                        then (p, n+1) : xs
+                                        else (p2, n) : sumarAlProyecto p xs
+
+
+{-
+asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
+Prop: Devuelve una lista de pares que representa a los proyectos (sin repetir) junto con su
+cantidad de personas involucradas. 
 asignadosPorProyecto e =  asignadosPorProyectoConCantidad (proyectos e) e 
 
 --subtarea
 asignadoAlProyecto :: Proyecto -> Empresa -> [(Proyecto, Int)]
 --Prop: Dado un proyecto indica la cantidad de empleados de la empresa dada que trabajan en el proyecto 
 asignadoAlProyecto p e = [(p, (cantQueTrabajanEn [p] e))]
-
-
 -- subtarea
 asignadosPorProyectoConCantidad :: [Proyecto] -> Empresa -> [(Proyecto, Int)]
 asignadosPorProyectoConCantidad [] _ = []
 asignadosPorProyectoConCantidad (x:xs) e = asignadoAlProyecto x e ++ asignadosPorProyectoConCantidad xs e
+
+Estás recorriendo muchísimas veces todos los proyectos de la empresa, lo que no es muy bueno. Primero le sacás los repetidos, luego por cada uno volvés a recorrer para contar cuántos hay. 
+-}
