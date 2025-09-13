@@ -207,11 +207,13 @@ edadDeUnaPersona :: Persona -> Int
 edadDeUnaPersona (P _ e) = e
 --2
 data TipoDePokemon = Agua | Fuego | Planta
-instance Eq TipoDePokemon where
-    Agua == Agua = True
-    Fuego == Fuego = True 
-    Planta == Planta = True
-    _ == _  = False
+--subtarea
+sonIgualesTipo :: TipoDePokemon -> TipoDePokemon -> Bool
+sonIgualesTipo Agua Agua     = True
+sonIgualesTipo Fuego Fuego   = True
+sonIgualesTipo Planta Planta = True
+sonIgualesTipo _ _           = False
+
 data Pokemon = ConsPokemon TipoDePokemon Int
 data Entrenador = ConsEntrenador String [Pokemon]
 
@@ -229,7 +231,7 @@ cantPokemon (ConsEntrenador _ ps) = longitud ps
 cantPokemonDe :: TipoDePokemon -> Entrenador -> Int
 -- Prop: Devuelve la cantidad de Pokémon de determinado tipo que posee el entrenador.
 cantPokemonDe t (ConsEntrenador n []) = 0
-cantPokemonDe t (ConsEntrenador n ((ConsPokemon x _) : ps)) = if (t == x)
+cantPokemonDe t (ConsEntrenador n ((ConsPokemon x _) : ps)) = if sonIgualesTipo t x 
                                                                 then 1 + cantPokemonDe t (ConsEntrenador n ps)
                                                                 else 0 + cantPokemonDe t (ConsEntrenador n ps)
 {-
@@ -249,7 +251,7 @@ cuantosDeTipo_De_LeGananATodosLosDe_ t (ConsEntrenador _ ps) e2 = cuantosDeTipoE
 cuantosDeTipoEnLista :: TipoDePokemon -> [Pokemon] -> [Pokemon] -> Int
 --Prop: Describe dado los pokemon de la primera lista que son del tipo dado, que le ganan a todos los pokemons de la segunda lista
 cuantosDeTipoEnLista _ [] _ = 0
-cuantosDeTipoEnLista t (p:ps) p2 = if tipoDe p == t && leGanaATodosLosDe p p2
+cuantosDeTipoEnLista t (p:ps) p2 = if sonIgualesTipo (tipoDe p) t && leGanaATodosLosDe p p2
                                     then 1 + cuantosDeTipoEnLista t ps p2
                                     else cuantosDeTipoEnLista t ps p2
 
@@ -292,17 +294,30 @@ esMaestroPokemon x = if (cantPokemonDe Agua x  >= 1 && cantPokemonDe Fuego x >= 
 --3
 data Seniority = Junior | SemiSenior | Senior
     deriving Show
-instance Eq Seniority where
-    Junior == Junior = True
-    SemiSenior == SemiSenior = True
-    Senior == Senior = True 
-    _      == _      = False
+
+sonMismoSeniority :: Seniority -> Seniority -> Bool
+sonMismoSeniority Junior  Junior = True
+sonMismoSeniority SemiSenior SemiSenior = True 
+sonMismoSeniority Senior Senior = True
+sonMismoSeniority _  _ = False
 
 data Proyecto = ConsProyecto String
-    deriving (Show, Eq)
+    deriving Show
+--subtarea
+sonIgualesProyecto :: Proyecto -> Proyecto -> Bool
+sonIgualesProyecto (ConsProyecto n1) (ConsProyecto n2) = n1 == n2
+
 
 data Rol = Developer Seniority Proyecto | Management Seniority Proyecto
     deriving Show
+
+sonIgualesRol :: Rol -> Rol -> Bool
+sonIgualesRol (Developer s1 p1) (Developer s2 p2) =
+    sonMismoSeniority s1 s2 && sonIgualesProyecto p1 p2
+sonIgualesRol (Management s1 p1) (Management s2 p2) =
+    sonMismoSeniority s1 s2 && sonIgualesProyecto p1 p2
+sonIgualesRol _ _ = False
+
 
 data Empresa = ConsEmpresa [Rol]
     deriving Show
@@ -334,7 +349,7 @@ proyectoDeUnRol (Developer _ p) = p
 proyectoDeUnRol (Management _ p) = p
 
 --subtarea
-sinRepetidos :: Eq a => [a] -> [a]
+sinRepetidos ::  [Proyecto] -> [Proyecto]
 --Prop: Dada una lista de a devuelve una lista con los elementos de tal lista sin repetirse
 sinRepetidos [] = []
 sinRepetidos (x : xs) = if not (estaEnLaLista x xs) 
@@ -342,12 +357,11 @@ sinRepetidos (x : xs) = if not (estaEnLaLista x xs)
                             else sinRepetidos xs
 
 --subtarea
-estaEnLaLista :: Eq a => a -> [a] -> Bool
+estaEnLaLista :: Proyecto -> [Proyecto] -> Bool
 --Prop: Dada una lista y un elemento del mismo tipo que los elementos de la lista, indica con un True si ese elemento está en la lista, sino False
 estaEnLaLista _ [] = False
-estaEnLaLista y (x : xs) = if y == x 
-                                then True 
-                                else  estaEnLaLista y xs  
+estaEnLaLista p (q:qs) = sonIgualesProyecto p q || estaEnLaLista p qs
+
 
 --subtarea
 todosLosProyectos :: Empresa -> [Proyecto]
@@ -395,7 +409,7 @@ esDevSenior _ = False
 --subtarea
 devTrabajaEnProyecto :: Rol -> Proyecto -> Bool 
 --Prop: indica si un Developer  trabaja en el proyecto dado, si lo hace True, caso contrario False
-devTrabajaEnProyecto (Developer _ p) e =  p == e 
+devTrabajaEnProyecto (Developer _ p) e =  sonIgualesProyecto p e 
 devTrabajaEnProyecto _ _ = False
 
 
@@ -414,15 +428,13 @@ cantQueTrabajanEn ps (ConsEmpresa (x : xs)) = if trabajaEnAlguno x ps
 --subtarea
 trabajaEn :: Rol -> Proyecto -> Bool
 --Prop: indica si el empleado dado trabaja en el proyecto dado, si es afirmativo con True, caso contrario False
-trabajaEn e p = ((proyectoDeUnRol e) == p) 
+trabajaEn e p = sonIgualesProyecto (proyectoDeUnRol e)  p 
 
 --subtarea 
 trabajaEnAlguno :: Rol -> [Proyecto] -> Bool
 --Prop: indica si el empleado dado trabaja en alguno de los proyectos dados, si es afirmativo con True, caso contrario False
 trabajaEnAlguno _ [] = False
-trabajaEnAlguno e (x : xs) = if ((proyectoDeUnRol e) == x)
-                                        then True
-                                        else trabajaEnAlguno e xs
+trabajaEnAlguno e (x : xs) = sonIgualesProyecto (proyectoDeUnRol e) x || trabajaEnAlguno e xs
 
 --4
 
@@ -436,7 +448,7 @@ asignadosPorProyecto (ConsEmpresa (x:xs)) = sumarAlProyecto (proyectoDeUnRol x) 
 sumarAlProyecto :: Proyecto -> [(Proyecto, Int)] -> [(Proyecto, Int)]
 --Prop: dado un proyecto y una lista de pares de proyectos con su cantidad de involucrados, incrementa la cantidad de involucrados en ese proyecto.
 sumarAlProyecto p [] = [(p,1)]
-sumarAlProyecto p ((p2, n): xs) = if p == p2
+sumarAlProyecto p ((p2, n): xs) = if sonIgualesProyecto p p2
                                         then (p, n+1) : xs
                                         else (p2, n) : sumarAlProyecto p xs
 
